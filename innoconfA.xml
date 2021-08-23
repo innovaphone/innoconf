@@ -1,160 +1,171 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <voicemail>
-<!-- innovaphone Conferencing == inno srl V1.01 KWA 2010 -->
-    <function define="Main">
+  <!-- innovaphone Conferencing == inno srl V1.01 KWA 2010 -->
+  <function define="Main">
     <assign out="$_pbxfwd" value="true" />
     <assign out="$_pbxcoder" value="g711a,g711u,g729" />
-	<pbx-getcallinfo out-cgpn="$cgpn" out-cdpn="$cdpn" out-leg2="$leg2" /> 
-	<event type="call-end">
-		<lib-strcat string="$cgpn" string2=".g711a" out-string="$WF" /> 
-		<lib-strcat string="-" string2="$WF" out-string="$CF" /> 
-		<store-del root="member" name="$CF"/> 
-		<wait sec="1"/>
-		<store-get-msgcount root="member" out-count="$res"/>
-		<switch var="$res">
-                <case not-equal="0">
-                	<store-cookie root="leave" name="$CF" value=""/>
-                </case>
-	        </switch>
-        </event>
-        <store-get root="" name="wellcome.$coder" out-url="$url"/>
+    <pbx-getcallinfo out-cgpn="$cgpn" out-cdpn="$cdpn" out-leg2="$leg2" />
+    <event type="call-end">
+      <lib-strcat string="$cgpn" string2=".g711a" out-string="$WF" />
+      <lib-strcat string="-" string2="$WF" out-string="$CF" />
+      <store-del root="member" name="$CF"/>
+      <wait sec="1"/>
+      <store-get-msgcount root="member" out-count="$res"/>
+      <switch var="$res">
+        <case not-equal="0">
+          <store-cookie root="leave" name="$CF" value=""/>
+        </case>
+      </switch>
+    </event>
+    <store-get root="" name="wellcome.$coder" out-url="$url"/>
+    <pbx-prompt url="$url"/>
+    <!-- look if there is yet the user-name stored and if not record it -->
+    <lib-strcat string="$cgpn" string2=".g711a" out-string="$pn" />
+    <lib-strcat string="names/" string2="$pn" out-string="$pn3" />
+    <store-getstat root="" name="$pn3" out-error="$error" />
+    <switch var="$error">
+      <case not-equal="0">
+        <store-get root="" name="myname.$coder" out-url="$url"/>
         <pbx-prompt url="$url"/>
-<!-- look if there is yet the user-name stored and if not record it -->
-        <lib-strcat string="$cgpn" string2=".g711a" out-string="$pn" /> 
-        <lib-strcat string="names/" string2="$pn" out-string="$pn3" /> 
-	<store-getstat root="" name="$pn3" out-error="$error" />
-	<switch var="$error">
-                <case not-equal="0">
-                	<store-get root="" name="myname.$coder" out-url="$url"/>
-			<pbx-prompt url="$url"/>
-			<assign out="$Mynname" value="$pn3" />
-		        <call name="Recording" />    
-                </case>
-        </switch>
-	<call name="Playuser" />
-	<store-get root="" name="to.$coder" out-url="$url"/>
-        <pbx-prompt url="$url"/>
-		
-<!-- look if there is yet the conference-name stored and if not record it -->
-	<lib-strcat string="names/" string2="Conferencename.g711a" out-string="$pn2" /> 
-	<store-getstat root="" name="$pn2" out-error="$error" />
-	<switch var="$error">
-                <case not-equal="0">
-			<store-get root="" name="confname.$coder" out-url="$url"/>
-		        <pbx-prompt url="$url"/>
-                        <assign out="$Mynname" value="names/Conferencename.g711a" />
-			<call name="Recording" />
-		</case>
-        </switch>
-	<call name="Playconf" />
-<!-- Mainmenu -->
-	<event type="dtmf" block="false">	
-		<pbx-getdtmfdigit out-dtmf="$dtmf" /> 
-			 <switch var="$dtmf">
-				<case equal="*">
-					<call name="PlayMember" />  
-					<lib-strcat string="-" string2="$pn" out-string="$res"/>
- 					<store-cookie root="member" name="$res" value="$cgpn"/>
- 					<store-cookie root="join" name="$res" value="$cgpn"/>
-					<pbx-fwd name="innoconf" barge-in="false" out-cause="$cause"/>
-					<store-get root="" name="noconf.$coder" out-url="$url"/>
-					<pbx-prompt url="$url"/>
-				</case>
-				<case equal="1">
-					<store-get root="" name="myname.$coder" out-url="$url"/>
-					<pbx-prompt url="$url"/>
-					<assign out="$Mynname" value="$pn3" />
-		                        <call name="Recording" />
-					<call name="Playuser" />
-				</case>
-				<case equal="2">
-					<store-get root="" name="confname.$coder" out-url="$url"/>
-				        <pbx-prompt url="$url"/>
-		                        <assign out="$Mynname" value="names/Conferencename.g711a" />
-					<call name="Recording" />
-					<call name="Playconf" />
-				</case>
-			</switch>
-  	</event>
-	<assign out="$mmenu-ok" value="false" /> 
-	<while notcond="$mmenu-ok">
-		<store-get root="" name="mmenu.$coder" out-url="$url"/>
-	        <pbx-prompt url="$url"  /> 
-  		<store-get root="" name="silence.$coder" out-url="$ctrl" /> 
-  		<assign out="$Teiln-timeout" value="true" /> 
-  		<pbx-prompt url="$ctrl" sec="2" repeat="true" /> 
-			<if cond="$Teiln-timeout">
-				<store-get root="" name="mmenu.$coder" out-url="$ctrl" /> 
-				<pbx-prompt url="$ctrl" /> 
-			</if>
-  	</while>
-        <pbx-disc/>
-    </function>  
+        <assign out="$Mynname" value="$pn3" />
+        <call name="Recording" />
+      </case>
+    </switch>
+    <call name="Playuser" />
+    <store-get root="" name="to.$coder" out-url="$url"/>
+    <pbx-prompt url="$url"/>
 
-<!-- General Reccording Function -->
-     <function define="Recording">
-	<event type="dtmf" block="false">	
-		<pbx-getdtmfdigit out-dtmf="$dtmf" /> 
-			 <switch var="$dtmf">
-				<case not-equal="*">
-					<assign out="$menu-ok" value="true" /> 
-				</case>
-				<case equal="*">
-					<store-get root="" name="$Mynname" out-url="$rurl" /> 
-  					<pbx-record url="$rurl" sec="10"/>
-				</case>
-			 </switch>
-  	</event>
-	<assign out="$menu-ok" value="false" />		
-	<while notcond="$menu-ok">
-		<store-get root="" name="silence.$coder" out-url="$ctrl" /> 
-		<pbx-prompt url="$ctrl" sec="1" repeat="false" /> 
-        	<store-get root="" name="recstart.$coder" out-url="$ctrl"/>
-  		<assign out="$Teiln-timeout" value="true" /> 
-		<pbx-prompt url="$ctrl" sec="15" repeat="true" /> 
-		<switch var="$menu-ok">
-			<case equal="false">
-				<pbx-disc/>
-  			</case>
-		 </switch>		
-  	</while>
-     </function>
-<!-- Play all member name -->
-     <function define="PlayMember">
-	<store-get-msgcount root="member" out-count="$res"/> 
-		<switch var="$res">
-			<case equal="0">
-	        	        <store-get root="" name="Firstuser.$coder" out-url="$ctrl" /> 
-				<pbx-prompt url="$ctrl" />    
-			</case>
-			<case not-equal="0">
-				<store-get root="" name="intheconf.$coder" out-url="$url"/>
-       				<pbx-prompt url="$url"/>	
-				<store-getnext root="member" out-handle="$handle" out-url="$member"/>
-				<while cond="$member">
-					<store-split url="$member" out-path="$path" out-file="$file" out-cgpn="$Wavefile"/>
-					<lib-strcat string="$Wavefile" string2=".g711a" out-string="$WF" /> 
-					<store-get root="names" name="$WF" out-url="$url"/>
-					<pbx-prompt url="$url"/>		
-					<store-getnext root="member" handle="$handle" out-url="$member"/>
-				</while> 
-			</case>
- 		</switch>
-     </function>
-<!-- Play the name of the member -->
-     <function define="Playuser">
-	<store-get root="" name="Userwellcome.$coder" out-url="$url"/>
+    <!-- look if there is yet the conference-name stored and if not record it -->
+    <lib-strcat string="names/" string2="Conferencename.g711a" out-string="$pn2" />
+    <store-getstat root="" name="$pn2" out-error="$error" />
+    <switch var="$error">
+      <case not-equal="0">
+        <store-get root="" name="confname.$coder" out-url="$url"/>
         <pbx-prompt url="$url"/>
-        <store-get root="" name="$pn3" out-url="$url"/>
-        <pbx-prompt url="$url"/> 
-     </function>
-<!-- Play the name of the conference -->
-     <function define="Playconf">
-	<store-get root="" name="conference.g711a" out-url="$url"/>
+        <assign out="$Mynname" value="names/Conferencename.g711a" />
+        <call name="Recording" />
+      </case>
+    </switch>
+    <call name="Playconf" />
+    <!-- Mainmenu -->
+    <event type="dtmf" block="false">
+      <pbx-getdtmfdigit out-dtmf="$dtmf" />
+      <switch var="$dtmf">
+        <case equal="*">
+          <call name="PlayMember" />
+          <lib-strcat string="-" string2="$pn" out-string="$res"/>
+          <store-cookie root="member" name="$res" value="$cgpn"/>
+          <store-cookie root="join" name="$res" value="$cgpn"/>
+          <dbg string="INNOCONF-DIALIN: trying to connect to the conference..."/>
+          <pbx-fwd name="innoconf" barge-in="false" out-cause="$cause"/>
+          <dbg string="INNOCONF-DIALIN: connect to the conference failed"/>
+          <store-get root="" name="noconf.$coder" out-url="$url"/>
+          <pbx-prompt url="$url"/>
+        </case>
+        <case equal="1">
+          <store-get root="" name="myname.$coder" out-url="$url"/>
+          <pbx-prompt url="$url"/>
+          <assign out="$Mynname" value="$pn3" />
+          <call name="Recording" />
+          <call name="Playuser" />
+        </case>
+        <case equal="2">
+          <store-get root="" name="confname.$coder" out-url="$url"/>
+          <pbx-prompt url="$url"/>
+          <assign out="$Mynname" value="names/Conferencename.g711a" />
+          <call name="Recording" />
+          <call name="Playconf" />
+        </case>
+      </switch>
+    </event>
+    <assign out="$mmenu-ok" value="false" />
+    <while notcond="$mmenu-ok">
+      <store-get root="" name="mmenu.$coder" out-url="$url"/>
+      <pbx-prompt url="$url"  />
+      <store-get root="" name="silence.$coder" out-url="$ctrl" />
+      <assign out="$Teiln-timeout" value="true" />
+      <pbx-prompt url="$ctrl" sec="2" repeat="true" />
+      <if cond="$Teiln-timeout">
+        <store-get root="" name="mmenu.$coder" out-url="$ctrl" />
+        <pbx-prompt url="$ctrl" />
+      </if>
+    </while>
+    <pbx-disc/>
+  </function>
+
+  <!-- General Reccording Function -->
+  <function define="Recording">
+    <event type="dtmf" block="false">
+      <pbx-getdtmfdigit out-dtmf="$dtmf" />
+      <switch var="$dtmf">
+        <case not-equal="*">
+          <assign out="$menu-ok" value="true" />
+        </case>
+        <case equal="*">
+          <store-get root="" name="$Mynname" out-url="$rurl" />
+          <pbx-record url="$rurl" sec="10"/>
+        </case>
+      </switch>
+    </event>
+    <assign out="$menu-ok" value="false" />
+    <while notcond="$menu-ok">
+      <store-get root="" name="silence.$coder" out-url="$ctrl" />
+      <pbx-prompt url="$ctrl" sec="1" repeat="false" />
+      <store-get root="" name="recstart.$coder" out-url="$ctrl"/>
+      <assign out="$Teiln-timeout" value="true" />
+      <pbx-prompt url="$ctrl" sec="15" repeat="true" />
+      <switch var="$menu-ok">
+        <case equal="false">
+          <pbx-disc/>
+        </case>
+      </switch>
+    </while>
+  </function>
+  <!-- Play all member name -->
+  <function define="PlayMember">
+    <dbg string="INNOCONF-DIALIN: play current conference members"/>
+    <store-get-msgcount root="member" out-count="$res"/>
+    <switch var="$res">
+      <case equal="0">
+        <store-get root="" name="Firstuser.$coder" out-url="$ctrl" />
+        <pbx-prompt url="$ctrl" />
+      </case>
+      <case not-equal="0">
+        <store-get root="" name="intheconf.$coder" out-url="$url"/>
         <pbx-prompt url="$url"/>
-	<store-get root="" name="$pn2" out-url="$url"/>
-        <pbx-prompt url="$url"/>
-     </function>
+        <store-getnext root="member" out-handle="$handle" out-url="$member"/>
+        <while cond="$member">
+          <store-split url="$member" out-path="$path" out-file="$file" out-cgpn="$Wavefile"/>
+          <lib-strcat string="$Wavefile" string2=".g711a" out-string="$WF" />
+          <store-get root="names" name="$WF" out-url="$url"/>
+          <pbx-prompt url="$url"/>
+          <store-getnext root="member" handle="$handle" out-url="$member"/>
+        </while>
+      </case>
+    </switch>
+  </function>
+  <!-- Play the name of the member -->
+  <function define="Playuser">
+    <store-get root="" name="Userwellcome.$coder" out-url="$url"/>
+    <pbx-prompt url="$url"/>
+    <store-get root="" name="menuinc.$coder" out-url="$url"/>
+    <pbx-prompt url="$url"/>
+    <store-get root="" name="$pn3" out-url="$url"/>
+    <pbx-prompt url="$url"/>
+    <store-get root="" name="menudec.$coder" out-url="$url"/>
+    <pbx-prompt url="$url"/>
+  </function>
+  <!-- Play the name of the conference -->
+  <function define="Playconf">
+    <store-get root="" name="conference.g711a" out-url="$url"/>
+    <pbx-prompt url="$url"/>
+    <store-get root="" name="menuinc.$coder" out-url="$url"/>
+    <pbx-prompt url="$url"/>
+    <store-get root="" name="$pn2" out-url="$url"/>
+    <pbx-prompt url="$url"/>
+    <store-get root="" name="menudec.$coder" out-url="$url"/>
+    <pbx-prompt url="$url"/>
+  </function>
 </voicemail>
 
 
