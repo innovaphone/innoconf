@@ -58,9 +58,16 @@
           <store-cookie root="join" name="$res" value="$cgpn"/>
           <dbg string="INNOCONF-DIALIN: trying to connect to the conference..."/>
           <pbx-fwd name="innoconf" barge-in="false" out-cause="$cause"/>
-          <dbg string="INNOCONF-DIALIN: connect to the conference failed"/>
-          <store-get root="" name="noconf.$coder" out-url="$url"/>
-          <pbx-prompt url="$url"/>
+          <switch var="$cause"> 
+            <case equal="26">
+              <pbx-disc cause="26" />
+            </case>
+            <default>
+              <dbg string="INNOCONF-DIALIN: connect to the conference failed"/>
+              <store-get root="" name="noconf.$coder" out-url="$url"/>
+              <pbx-prompt url="$url"/>
+            </default>
+          </switch>
         </case>
         <case equal="1">
           <store-get root="" name="myname.$coder" out-url="$url"/>
@@ -167,9 +174,4 @@
     <pbx-prompt url="$url"/>
   </function>
 </voicemail>
-
-
-
-
-
 <!-- innovaphone conferencing wiki-src/xml/innoconf 1,0,0,0 (C) innovaphone AG 2010-2010 -->
