@@ -1,0 +1,1 @@
+DO NOT delete this folder - contains the name prompts for conference participants

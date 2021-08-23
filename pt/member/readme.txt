@@ -1,0 +1,1 @@
+DO NOT delete this folder - contains the names of current conference participants
