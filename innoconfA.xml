@@ -13,7 +13,7 @@
       <store-get-msgcount root="member" out-count="$res"/>
       <switch var="$res">
         <case not-equal="0">
-          <store-cookie root="leave" name="$CF" value=""/>
+          <store-cookie root="leave" name="$CF" value="x"/>
         </case>
       </switch>
     </event>
