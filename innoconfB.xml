@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<voicemail>
+<!-- innovaphone Conference Control XML for conferencing unit == inno srl V1.00 KWA 2010 -->
+    <function define="Main">
+	<event type="call-end">
+		<wait sec="1"/>
+		<store-getnext root="join" out-handle="$handle" out-url="$member"/>
+		<while cond="$member">
+			<store-del root="" name="$member"/> 
+			<store-getnext root="join" handle="$handle" out-url="$member"/>
+		</while>            
+		<store-getnext root="leave" out-handle="$handle" out-url="$member"/>
+		<while cond="$member">
+			<store-del root="" name="$member"/> 
+			<store-getnext root="leave" handle="$handle" out-url="$member"/>
+		</while> 
+	        <store-del root="" name="names/Conferencename.g729"/> 
+        </event>            
+	<while notcond="$Teiln-ok">
+			<wait sec="2"/>     
+			<call name="CheckifNew" />
+			<wait sec="2"/>     
+			<call name="Leaving" />
+        </while>
+    </function>  
+<!-- check if new entry -->
+     <function define="CheckifNew">
+	<store-getnext root="join" out-handle="$handle" out-url="$member"/>
+	<while cond="$member">
+		<store-get root="" name="beep.g729" out-url="$ctrl" /> 
+		<pbx-prompt url="$ctrl" /> 
+		<store-split url="$member" out-path="$path" out-file="$file" out-cgpn="$Wavefile"/>
+		<lib-strcat string="$Wavefile" string2=".g729" out-string="$WF" /> 
+		<store-get root="names" name="$WF" out-url="$url"/>
+		<pbx-prompt url="$url"/>
+		<store-del root="join" name="$file"/>  		
+		<store-get root="" name="join.g729" out-url="$ctrl" /> 
+		<pbx-prompt url="$ctrl" />
+		<store-getnext root="join" handle="$handle" out-url="$member"/>
+	</while> 
+     </function>
+<!-- check if leaving -->
+     <function define="Leaving">
+	<store-getnext root="leave" out-handle="$lhandle" out-url="$lmember"/>
+	<while cond="$lmember">
+		<store-get root="" name="beep.g729" out-url="$ctrl" /> 
+		<pbx-prompt url="$ctrl" /> 
+		<store-split url="$lmember" out-path="$path" out-file="$file" out-cgpn="$LWavefile"/>
+		<lib-strcat string="$LWavefile" string2=".g729" out-string="$WF" /> 
+		<store-get root="names" name="$WF" out-url="$url"/>
+		<pbx-prompt url="$url"/>
+		<store-del root="leave" name="$file"/>  		
+		<store-get root="" name="leave.g729" out-url="$ctrl" /> 
+		<pbx-prompt url="$ctrl" />
+		<store-getnext root="leave" handle="$lhandle" out-url="$lmember"/>
+	</while> 
+     </function>
+  
+</voicemail>
+<!-- innovaphone conferencing wiki-src/xml/innoconf 1,0,0,0 (C) innovaphone AG 2010-2010 -->
