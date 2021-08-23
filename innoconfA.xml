@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <voicemail>
-  <!-- innovaphone Conferencing == inno srl V1.01 KWA 2010 -->
+  <!-- innovaphone Conferencing -->
   <function define="Main">
     <assign out="$_pbxfwd" value="true" />
     <assign out="$_pbxcoder" value="g711a,g711u,g729" />
     <pbx-getcallinfo out-cgpn="$cgpn" out-cdpn="$cdpn" out-leg2="$leg2" />
+    <lib-enc string="$cgpn" out-string="$cgpn" type="url"/>
+    <!-- encode asterisk -->
+    <assign out="$string_encode_asterisk" value="$cgpn" />
+    <call name="encode_asterisk" />
+    <assign out="$cgpn" value="$string_encode_asterisk" />
+    <!-- /encode asterisk -->
     <event type="call-end">
       <lib-strcat string="$cgpn" string2=".g711a" out-string="$WF" />
-      <lib-strcat string="-" string2="$WF" out-string="$CF" />
-      <store-del root="member" name="$CF"/>
+      <store-del root="member" name="$WF"/>
       <wait sec="1"/>
       <store-get-msgcount root="member" out-count="$res"/>
       <switch var="$res">
         <case not-equal="0">
-          <store-cookie root="leave" name="$CF" value="x"/>
+          <store-cookie root="leave" name="$WF" value="x"/>
         </case>
       </switch>
     </event>
@@ -47,15 +52,15 @@
       </case>
     </switch>
     <call name="Playconf" />
+	
     <!-- Mainmenu -->
     <event type="dtmf" block="false">
       <pbx-getdtmfdigit out-dtmf="$dtmf" />
       <switch var="$dtmf">
         <case equal="*">
           <call name="PlayMember" />
-          <lib-strcat string="-" string2="$pn" out-string="$res"/>
-          <store-cookie root="member" name="$res" value="$cgpn"/>
-          <store-cookie root="join" name="$res" value="$cgpn"/>
+          <store-cookie root="member" name="$pn" value="$cgpn"/>
+          <store-cookie root="join" name="$pn" value="$cgpn"/>
           <dbg string="INNOCONF-DIALIN: trying to connect to the conference..."/>
           <pbx-fwd name="innoconf" barge-in="false" out-cause="$cause"/>
           <switch var="$cause"> 
@@ -128,6 +133,7 @@
       </switch>
     </while>
   </function>
+  
   <!-- Play all member name -->
   <function define="PlayMember">
     <dbg string="INNOCONF-DIALIN: play current conference members"/>
@@ -143,14 +149,14 @@
         <store-getnext root="member" out-handle="$handle" out-url="$member"/>
         <while cond="$member">
           <store-split url="$member" out-path="$path" out-file="$file" out-cgpn="$Wavefile"/>
-          <lib-strcat string="$Wavefile" string2=".g711a" out-string="$WF" />
-          <store-get root="names" name="$WF" out-url="$url"/>
+          <store-get root="names" name="$file" out-url="$url"/>
           <pbx-prompt url="$url"/>
           <store-getnext root="member" handle="$handle" out-url="$member"/>
         </while>
       </case>
     </switch>
   </function>
+  
   <!-- Play the name of the member -->
   <function define="Playuser">
     <store-get root="" name="Userwellcome.$coder" out-url="$url"/>
@@ -162,6 +168,7 @@
     <store-get root="" name="menudec.$coder" out-url="$url"/>
     <pbx-prompt url="$url"/>
   </function>
+  
   <!-- Play the name of the conference -->
   <function define="Playconf">
     <store-get root="" name="conference.g711a" out-url="$url"/>
@@ -173,5 +180,31 @@
     <store-get root="" name="menudec.$coder" out-url="$url"/>
     <pbx-prompt url="$url"/>
   </function>
+  
+  <function define="encode_asterisk">
+    <!-- expect existing variable called $string_encode_asterisk -->
+    <assign out="$string_position" value="1" />
+    <assign out="$string_position_finished" value="0" />
+    <assign out="$string_encode_asterisk_tmp" value="" />
+    <lib-strlen string="$string_encode_asterisk" out="$string_length" />
+    <while notcond="$string_position_finished">
+        <index out="$res" value="$string_encode_asterisk" pos="$string_position" size="1"/>
+        <switch var="$res">
+            <case equal="*">
+                <lib-strcat out-string="$string_encode_asterisk_tmp" string="$string_encode_asterisk_tmp" string2="%2a"/>
+            </case>
+            <default>
+                <lib-strcat out-string="$string_encode_asterisk_tmp" string="$string_encode_asterisk_tmp" string2="$res"/>
+            </default>
+        </switch>
+        
+        <add value="$string_position" value2="1" out="$string_position" />
+        <switch var="$string_position">
+            <case greater="$string_length">
+                <assign out="$string_encode_asterisk" value="$string_encode_asterisk_tmp" />
+                <assign out="$string_position_finished" value="1" />
+            </case>
+        </switch>	
+    </while>
+  </function>
 </voicemail>
-<!-- innovaphone conferencing wiki-src/xml/innoconf 1,0,0,0 (C) innovaphone AG 2010-2010 -->

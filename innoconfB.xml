@@ -38,8 +38,7 @@
       <store-get root="" name="ding.g711a" out-url="$ctrl" />
       <pbx-prompt url="$ctrl" />
       <store-split url="$member" out-path="$path" out-file="$file" out-cgpn="$Wavefile"/>
-      <lib-strcat string="$Wavefile" string2=".g711a" out-string="$WF" />
-      <store-get root="names" name="$WF" out-url="$url"/>
+      <store-get root="names" name="$file" out-url="$url"/>
       <pbx-prompt url="$url"/>
       <store-del root="join" name="$file"/>
       <store-get root="" name="join.g711a" out-url="$ctrl" />
@@ -55,8 +54,7 @@
       <store-get root="" name="ding.g711a" out-url="$ctrl" />
       <pbx-prompt url="$ctrl" />
       <store-split url="$lmember" out-path="$path" out-file="$file" out-cgpn="$LWavefile"/>
-      <lib-strcat string="$LWavefile" string2=".g711a" out-string="$WF" />
-      <store-get root="names" name="$WF" out-url="$url"/>
+      <store-get root="names" name="$file" out-url="$url"/>
       <pbx-prompt url="$url"/>
       <store-del root="leave" name="$file"/>
       <store-get root="" name="leave.g711a" out-url="$ctrl" />
